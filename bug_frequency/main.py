@@ -144,14 +144,13 @@ def main(args):
             course_name, race_type_name = process(img_path, ocr_path)
             race_type_dict.setdefault(race_type_name, 0)
             race_type_dict[race_type_name] += 1
-            rows.append(course_name.split('_')[
-                        0], race_type_dict, dirname.split('_')[0], str(img_path))
+            rows.append([course_name.split('_')[0], race_type_name,
+                        dirname.split('_')[0], str(img_path)])
 
     import pandas as pd
     df = pd.DataFrame(rows)
-
     df.to_csv("statistics.csv", header=[
-              "Cource", "type", "Ver", "image_path"], index=None)
+              "cource", "type", "ver", "image_path"], index=None, encoding="sjis")
 
     print(race_type_dict)
 
