@@ -66,14 +66,15 @@ def main(args):
     mirrors = []
 
 #    thrs = [5000, 10000, 15000, 20000, 25000, 30000, 1e8]
-    thrs = [10000, 20000, 30000, 1e8]
+    thrs = [10000, 1e8]
     total_dict = {f"<{v}": 0 for v in thrs}
     occur_dict = {f"<{v}": 0 for v in thrs}
 
     value_types = []
     for row in sorted_rows:
         rates = [v for v in row[4:4+12] if v > 0]
-        value = np.max(rates) - np.min(rates)
+#        value = np.max(rates) - np.min(rates)
+        value = np.std(rates)
         rate_metrics.append(value)
         mirrors.append(row[1] == "mirror")
 
@@ -95,33 +96,37 @@ def main(args):
         print(f"{k}: {100 * prob:.1f}% ({occur_dict[k]}/{total_dict[k]})")
 
     xs = []
-    ys_200 = []
+    ys_200cc = []
     ys_mirror = []
-    step = 8000
-    for thr in range(0, 80000, step):
+    span = 10000
+    step = 100
+    for thr in range(0, 100000, step):
         mirror, cc200, n = 0, 0, 0
         for value, type in value_types:
-            if thr - step < value <= thr:
+            if thr - span < value <= thr:
                 n += 1
                 if type == "mirror":
                     mirror += 1
                 if type == "200cc":
                     cc200 += 1
-        if n > 0:
+        if n > 50:
             xs.append(thr)
-            ys_200.append(cc200 / n)
+            ys_200cc.append(cc200 / n)
             ys_mirror.append(mirror / n)
+#            print(thr, "-->", n)
+
+
+    print("mirror corr", np.corrcoef(xs, ys_mirror)[0, 1])
+    print("200cc corr", np.corrcoef(xs, ys_200cc)[0, 1])
 
     import matplotlib.pyplot as plt
-    plt.plot(xs, ys_mirror, "x")
-    plt.ylim([0, 0.15])
-  #  plt.plot(xs, ys_200)
+  #  plt.ylim([0, 0.2])
+    plt.xlabel("std of rates")
+    plt.ylabel("prob")
+    plt.plot(xs, ys_mirror, "-", label="mirror")
+    plt.plot(xs, ys_200cc, "-", label="200cc")
+    plt.legend()
     plt.show()
-
-    # for i, row in enumerate(sorted_rows):
-    #     if i % 10 == 0:
-    #         print(i, row)
-
     return
 
     # count
