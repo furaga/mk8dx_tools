@@ -62,18 +62,66 @@ def main(args):
     types = [r[1] for r in sorted_rows]
     ys = [1 if t == "mirror" else 0 for t in types]
 
-    roll = 50
-    ys_mean = [np.sum(ys[i:i+roll]) for i in range(0, len(ys) - roll)]
-    print(ys, np.sum(ys))
-    print(ys_mean)
+    rate_metrics = []
+    mirrors = []
 
-    for i, row in enumerate(sorted_rows):
-        if i % 10 == 0:
-            print(i, row)
+#    thrs = [5000, 10000, 15000, 20000, 25000, 30000, 1e8]
+    thrs = [10000, 20000, 30000, 1e8]
+    total_dict = {f"<{v}": 0 for v in thrs}
+    occur_dict = {f"<{v}": 0 for v in thrs}
+
+    value_types = []
+    for row in sorted_rows:
+        rates = [v for v in row[4:4+12] if v > 0]
+        value = np.max(rates) - np.min(rates)
+        rate_metrics.append(value)
+        mirrors.append(row[1] == "mirror")
+
+        key = ""
+        for v in thrs:
+            if value <= v:
+                key = f"<{v}"
+                break
+
+        total_dict[key] += 1
+        if row[1] == "200cc":
+            occur_dict[key] += 1
+
+        value_types.append([value, row[1]])
+
+    print(total_dict, occur_dict)
+    for k in total_dict.keys():
+        prob = occur_dict[k] / total_dict[k] if total_dict[k] > 0 else 0
+        print(f"{k}: {100 * prob:.1f}% ({occur_dict[k]}/{total_dict[k]})")
+
+    xs = []
+    ys_200 = []
+    ys_mirror = []
+    step = 8000
+    for thr in range(0, 80000, step):
+        mirror, cc200, n = 0, 0, 0
+        for value, type in value_types:
+            if thr - step < value <= thr:
+                n += 1
+                if type == "mirror":
+                    mirror += 1
+                if type == "200cc":
+                    cc200 += 1
+        if n > 0:
+            xs.append(thr)
+            ys_200.append(cc200 / n)
+            ys_mirror.append(mirror / n)
 
     import matplotlib.pyplot as plt
-    plt.plot(ys_mean)
+    plt.plot(xs, ys_mirror, "x")
+    plt.ylim([0, 0.15])
+  #  plt.plot(xs, ys_200)
     plt.show()
+
+    # for i, row in enumerate(sorted_rows):
+    #     if i % 10 == 0:
+    #         print(i, row)
+
     return
 
     # count
