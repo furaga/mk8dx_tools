@@ -41,8 +41,22 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+def config_std_div_avg():
+    get_metric = lambda rates: np.std(rates) / np.mean(rates)
+    span = 0.25
+    x_label = "std/avg of rates"
+    return get_metric, span, x_label
+
+def config_std():
+    get_metric = lambda rates: np.std(rates)
+    span = 2500
+    x_label = "std/avg of rates"
+    return get_metric, span, x_label
 
 def main(args):
+    # get_metric, span, x_label = config_std_div_avg()
+    get_metric, span, x_label = config_std()
+
     import pandas as pd
     df = pd.read_csv(args.csv_path, encoding="sjis")
 
@@ -73,8 +87,8 @@ def main(args):
     value_types = []
     for row in sorted_rows:
         rates = [v for v in row[4:4+12] if v > 0]
-#        value = np.max(rates) - np.min(rates)
-        value = np.std(rates)
+#        value = np.std(rates)
+        value = get_metric(rates)
         rate_metrics.append(value)
         mirrors.append(row[1] == "mirror")
 
@@ -95,33 +109,32 @@ def main(args):
         prob = occur_dict[k] / total_dict[k] if total_dict[k] > 0 else 0
         print(f"{k}: {100 * prob:.1f}% ({occur_dict[k]}/{total_dict[k]})")
 
+    value_types = sorted(value_types)
+
     xs = []
     ys_200cc = []
     ys_mirror = []
-    span = 10000
-    step = 100
-    for thr in range(0, 100000, step):
+    for value, _ in value_types:
+        # 自分周辺のミラー率
         mirror, cc200, n = 0, 0, 0
-        for value, type in value_types:
-            if thr - span < value <= thr:
+        for value2, type2 in value_types:
+            if value - span < value2 <= value + span:
                 n += 1
-                if type == "mirror":
+                if type2 == "mirror":
                     mirror += 1
-                if type == "200cc":
+                if type2 == "200cc":
                     cc200 += 1
-        if n > 50:
-            xs.append(thr)
+        if n > 100:
+            xs.append(value)
             ys_200cc.append(cc200 / n)
             ys_mirror.append(mirror / n)
-#            print(thr, "-->", n)
-
 
     print("mirror corr", np.corrcoef(xs, ys_mirror)[0, 1])
     print("200cc corr", np.corrcoef(xs, ys_200cc)[0, 1])
 
     import matplotlib.pyplot as plt
   #  plt.ylim([0, 0.2])
-    plt.xlabel("std of rates")
+    plt.xlabel(x_label)
     plt.ylabel("prob")
     plt.plot(xs, ys_mirror, "-", label="mirror")
     plt.plot(xs, ys_200cc, "-", label="200cc")
