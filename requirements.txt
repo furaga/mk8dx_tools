@@ -5,4 +5,4 @@ Pillow
 google-cloud-vision
 mss
 pandas
-
+matplotlib

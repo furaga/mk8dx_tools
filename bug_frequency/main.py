@@ -10,10 +10,11 @@ from pathlib import Path
 from playsound import playsound
 import pyocr
 from PIL import Image, ImageEnhance
-from lib import cv_util
+from lib import cv_util, digit_ocr
 import torch
 import torchvision
 
+game_screen_roi = [0, 0, 1655 / 1920, 929 / 1080]
 game_screen_roi = [0, 0, 1655 / 1920, 929 / 1080]
 
 race_type_roi = [0.16, 0.85, 0.24, 0.98]
@@ -42,8 +43,8 @@ def get_features(img):
 def crop_img(img, roi):
     h, w = img.shape[:2]
     img = img[
-        int(h * roi[1]):int(h * roi[3]),
-        int(w * roi[0]):int(w * roi[2]),
+        max(0, int(h * roi[1])):min(h, int(h * roi[3])),
+        max(0, int(w * roi[0])):min(w, int(w * roi[2])),
     ]
     return img
 
@@ -94,10 +95,41 @@ def find_best_match_item(feature, feature_dict):
     return score_list[0]
 
 
+def detect_rates(img):
+    players_roi = [
+        93 / 1920,
+        84 / 1080,
+        1827 / 1920,
+        870 / 1080,
+    ]
+    players_img = crop_img(img, players_roi)
+    h, w = players_img.shape[:2]
+    players = []
+    for x in range(2):
+        for y in range(6):
+            players.append(
+                crop_img(players_img, [x / 2, y / 6, (x + 1) / 2, (y+1) / 6]))
+
+    rates = []
+    for i, p in enumerate(players):
+        rate_img = crop_img(p, [0.75, 0.5, 0.995, 0.995])
+        rate_img = cv2.cvtColor(rate_img, cv2.COLOR_BGR2GRAY)
+        ret, rate = digit_ocr.detect_digit(255 - rate_img)
+        if not ret:
+            rate = 0
+        rates.append(rate)
+    #     cv2.imshow(f"r{i}", rate_img)
+    # cv2.waitKey(0)
+
+    return rates
+
+
 def process(img_path, ocr_path):
     img = cv_util.imread_safe(img_path)
     if img_path.parent.stem.endswith("_frame"):
         img = crop_img(img, game_screen_roi)
+
+    rates = detect_rates(img)
 
     course_img = crop_img(img, course_roi)
     race_type_img = crop_img(img, race_type_roi)
@@ -129,7 +161,7 @@ def process(img_path, ocr_path):
     #     cv2.imshow("race_type_img", race_type_img)
     #     if ord('q') == cv2.waitKey(1):
     #         exit(0)
-    return course_name, race_type_name
+    return course_name, race_type_name, rates
 
 
 def main(args):
@@ -137,25 +169,28 @@ def main(args):
     race_type_dict = {}
     rows = []
     for dirname in ["DLC1_frame", "DLC0_frame", "DLC0", "DLC1", "DLC2", "DLC3"]:
+        #    for dirname in ["DLC1_frame"]:
         print("Processing", dirname)  # str(img_path))
         all_img_paths = list(args.img_dir.glob(f"{dirname}/*.png"))
         local_dict = {}
-        for img_path in all_img_paths:
+        for ii, img_path in enumerate(all_img_paths):
             ocr_path = args.ocr_dir / dirname / (img_path.stem + ".txt")
-            course_name, race_type_name = process(img_path, ocr_path)
+            course_name, race_type_name, rates = process(
+                img_path, ocr_path)
             race_type_dict.setdefault(race_type_name, 0)
             race_type_dict[race_type_name] += 1
             local_dict.setdefault(race_type_name, 0)
             local_dict[race_type_name] += 1
             rows.append([course_name.split('_')[0], race_type_name,
-                        dirname.split('_')[0], str(img_path)])
+                        dirname.split('_')[0], str(img_path)] + rates)
         local_dict["total"] = np.sum([v for _, v in local_dict.items()])
         print(local_dict)
 
     import pandas as pd
     df = pd.DataFrame(rows)
     df.to_csv("statistics.csv", header=[
-              "cource", "type", "ver", "image_path"], index=None, encoding="sjis")
+              "cource", "type", "ver", "image_path"] + list(f"rate_{i}" for i in range(12)),
+              index=None, encoding="sjis")
 
     race_type_dict["total"] = np.sum([v for _, v in race_type_dict.items()])
     print(race_type_dict)
