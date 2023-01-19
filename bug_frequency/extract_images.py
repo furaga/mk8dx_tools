@@ -1,38 +1,17 @@
 # レース前のコース名と名前・レートが表示されている画面を探す
-import torchvision
-import torch
-from lib import cv_util
-from PIL import Image, ImageEnhance
-import pyocr
-from playsound import playsound
 from pathlib import Path
-import sys
-import os
-from glob import glob
-import numpy as np
-import clip
 import argparse
-import re
 import cv2
-import lib
+from lib import cv_util
 
 
-video_path = Path(
-    r"E:\prog\python\mk8dx_tools\videos\【マリカ】レート15035 今月の目標は16200!!【岸堂天真ホロスターズ】.mp4")
-
-
-game_screen_roi = [0, 0, 1655 / 1920, 929 / 1080]
-
-race_type_roi = [0.16, 0.85, 0.24, 0.98]
-course_roi = [0.72, 0.85, 0.84, 0.98]
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
-model, preprocess = clip.load('ViT-B/32', device)
-
+# video_path = Path(
+#     r"E:\prog\python\mk8dx_tools\videos\【マリカ】レート15035 今月の目標は16200!!【岸堂天真ホロスターズ】.mp4")
 
 def parse_args():
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('--img_dir', type=Path, default="data/images")
+    parser.add_argument('--video_dir', type=Path,
+                        default=r"E:\prog\python\mk8dx_tools\videos")
     args = parser.parse_args()
     return args
 
@@ -72,7 +51,7 @@ def get_black_ratio(img):
     return br
 
 
-def main(args):
+def process_video(video_path, out_dir):
     cap = cv2.VideoCapture(str(video_path))
     cap_length_sec = cap.get(cv2.CAP_PROP_FRAME_COUNT) / \
         cap.get(cv2.CAP_PROP_FPS)
@@ -82,9 +61,9 @@ def main(args):
         h = current_time // 3600
         m = (current_time % 3600) // 60
         s = current_time % 60
-        if current_time % 1000 == 0:
-            print(
-                f"[{100 * current_time / cap_length_sec:.1f}%] current_time={h:02d}h{m:02d}m{s:02d}s")
+        # if current_time % 1000 == 0:
+        #     print(
+        #         f"[{100 * current_time / cap_length_sec:.1f}%] current_time={h:02d}h{m:02d}m{s:02d}s")
 
         cap.set(cv2.CAP_PROP_POS_MSEC, current_time * 1000)
         ret, img = cap.read()
@@ -111,7 +90,8 @@ def main(args):
         print(int(wr * 100), int(br * 100))
 
         assert (3600 * h + m * 60 + s == current_time)
-        lib.cv_util.imwrite_safe(f"{video_path.stem}_{h:02d}h{m:02d}m{s:02d}s.jpg", img)
+        out_path = out_dir / f"{video_path.stem}_{h:02d}h{m:02d}m{s:02d}s.jpg"
+        cv_util.imwrite_safe(str(out_path), img)
 
         # cv2.imshow("img", cv2.resize(img, None, fx=0.5, fy=0.5))
         # if ord('q') == cv2.waitKey(1):
@@ -119,6 +99,18 @@ def main(args):
 
         counter = 0
         current_time += 90
+
+
+def main(args):
+    all_video_paths = list(args.video_dir.glob("*/*.mp4"))
+    for vi, video_path in enumerate(all_video_paths):
+        print("==================================")
+        print(f"[{vi+1}/{len(all_video_paths)}] {str(video_path)}")
+        print("==================================")
+
+        out_dir = Path("data/images_person2") / video_path.parent.stem
+        out_dir.mkdir(exist_ok=True, parents=True)
+        process_video(video_path, out_dir)
 
 
 if __name__ == '__main__':
