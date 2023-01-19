@@ -139,19 +139,25 @@ def main(args):
     for dirname in ["DLC1_frame", "DLC0_frame", "DLC0", "DLC1", "DLC2", "DLC3"]:
         print("Processing", dirname)  # str(img_path))
         all_img_paths = list(args.img_dir.glob(f"{dirname}/*.png"))
+        local_dict = {}
         for img_path in all_img_paths:
             ocr_path = args.ocr_dir / dirname / (img_path.stem + ".txt")
             course_name, race_type_name = process(img_path, ocr_path)
             race_type_dict.setdefault(race_type_name, 0)
             race_type_dict[race_type_name] += 1
+            local_dict.setdefault(race_type_name, 0)
+            local_dict[race_type_name] += 1
             rows.append([course_name.split('_')[0], race_type_name,
                         dirname.split('_')[0], str(img_path)])
+        local_dict["total"] = np.sum([v for _, v in local_dict.items()])
+        print(local_dict)
 
     import pandas as pd
     df = pd.DataFrame(rows)
     df.to_csv("statistics.csv", header=[
               "cource", "type", "ver", "image_path"], index=None, encoding="sjis")
 
+    race_type_dict["total"] = np.sum([v for _, v in race_type_dict.items()])
     print(race_type_dict)
 
     # for n, img in course_img_dict.items():
