@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from PIL import Image
-
+import os
 
 def imread_safe(filename, flags=cv2.IMREAD_COLOR, dtype=np.uint8):
     try:
@@ -11,6 +11,22 @@ def imread_safe(filename, flags=cv2.IMREAD_COLOR, dtype=np.uint8):
     except Exception as e:
         print(e)
         return None
+
+
+def imwrite_safe(filename, img, params=None):
+    try:
+        ext = os.path.splitext(filename)[1]
+        result, n = cv2.imencode(ext, img, params)
+
+        if result:
+            with open(filename, mode='w+b') as f:
+                n.tofile(f)
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(e)
+        return False
 
 
 def cv2pil(image):

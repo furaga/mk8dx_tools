@@ -14,9 +14,11 @@ import clip
 import argparse
 import re
 import cv2
+import lib
 
 
-video_path = r"E:\prog\python\mk8dx_tools\videos\【マリカ】レート15035 今月の目標は16200!!【岸堂天真ホロスターズ】.mp4"
+video_path = Path(
+    r"E:\prog\python\mk8dx_tools\videos\【マリカ】レート15035 今月の目標は16200!!【岸堂天真ホロスターズ】.mp4")
 
 
 game_screen_roi = [0, 0, 1655 / 1920, 929 / 1080]
@@ -31,17 +33,8 @@ model, preprocess = clip.load('ViT-B/32', device)
 def parse_args():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--img_dir', type=Path, default="data/images")
-    parser.add_argument('--ocr_dir', type=Path, default="data/ocr")
     args = parser.parse_args()
     return args
-
-
-def get_features(img):
-    with torch.no_grad():
-        p = cv_util.cv2pil(img)
-        image = preprocess(p).unsqueeze(0).to(device)
-        features = model.encode_image(image)
-        return features.cpu().numpy()
 
 
 def crop_img(img, roi):
@@ -51,40 +44,6 @@ def crop_img(img, roi):
         int(w * roi[0]):int(w * roi[2]),
     ]
     return img
-
-
-def load_image_feature(img, roi=None):
-    if roi is not None:
-        img = crop_img(img, roi)
-    feature = get_features(img)
-    return feature
-
-
-race_type_features_dict = {}
-thumbnail_features_dict = {}
-
-course_feature_dict = {}
-course_img_dict = {}
-
-
-def initialize():
-    for type_path in Path("data/race_type").glob("*.png"):
-        img = cv_util.imread_safe(str(type_path))
-        type_feature = load_image_feature(img, [0, 0, 1, 1])
-        race_type_features_dict[type_path.stem] = type_feature / \
-            np.linalg.norm(type_feature)
-
-    for thumb_path in Path("data/thumbnails").glob("*.png"):
-        img = cv_util.imread_safe(str(thumb_path))
-        thumb_feature = load_image_feature(img, [0, 0, 1, 0.8])
-        thumbnail_features_dict[thumb_path.stem] = thumb_feature / \
-            np.linalg.norm(thumb_feature)
-
-    for thumb_path in Path("data/thumbnails_2").glob("*.png"):
-        img = cv_util.imread_safe(str(thumb_path))
-        thumb_feature = load_image_feature(img, [0, 0, 1, 0.8])
-        thumbnail_features_dict[thumb_path.stem + "_A"] = thumb_feature / \
-            np.linalg.norm(thumb_feature)
 
 
 def find_best_match_item(feature, feature_dict):
@@ -113,31 +72,19 @@ def get_black_ratio(img):
     return br
 
 
-def process(img, course_img, race_type_img):
-    course_feature = load_image_feature(img, course_roi)
-    course_feature /= np.linalg.norm(course_feature)
-    course_name, course_score = find_best_match_item(
-        course_feature, thumbnail_features_dict)
-
-    race_type_feature = load_image_feature(img, race_type_roi)
-    race_type_feature /= np.linalg.norm(race_type_feature)
-    race_type_name, race_type_score = find_best_match_item(
-        race_type_feature, race_type_features_dict)
-
-    return course_name, course_score, race_type_name, race_type_score
-
-
 def main(args):
-    initialize()
-    cap = cv2.VideoCapture(video_path)
+    cap = cv2.VideoCapture(str(video_path))
     cap_length_sec = cap.get(cv2.CAP_PROP_FRAME_COUNT) / \
         cap.get(cv2.CAP_PROP_FPS)
     current_time = 0
     counter = 0
     while True:
+        h = current_time // 3600
+        m = (current_time % 3600) // 60
+        s = current_time % 60
         if current_time % 1000 == 0:
-            print(f"[{100 * current_time / cap_length_sec:.1f}%] current_time",
-                  current_time, "sec")
+            print(
+                f"[{100 * current_time / cap_length_sec:.1f}%] current_time={h:02d}h{m:02d}m{s:02d}s")
 
         cap.set(cv2.CAP_PROP_POS_MSEC, current_time * 1000)
         ret, img = cap.read()
@@ -145,12 +92,12 @@ def main(args):
             break
 
         br = get_black_ratio(img)
-        if not (0.2 < br < 0.4):
+        if not (0.22 < br):
             current_time += 2
             continue
 
         wr = get_white_ratio(img)
-        if not (wr > 0.15):
+        if not (wr > 0.13):
             current_time += 2
             continue
 
@@ -159,21 +106,14 @@ def main(args):
             current_time += 2
             continue
 
-        cource_img = crop_img(img, course_roi)
-        race_type_img = crop_img(img, race_type_roi)
-        course_name, course_score, race_type_name, race_type_score = process(
-            img, cource_img, race_type_img)
+        print(
+            f"*[{100 * current_time / cap_length_sec:.1f}%] current_time={h:02d}h{m:02d}m{s:02d}s")
+        print(int(wr * 100), int(br * 100))
 
-        print(f"[{100 * current_time / cap_length_sec:.1f}%] current_time",
-              current_time, "sec")
-        print(int(wr * 100), int(br * 100), "|", course_name,
-              course_score, race_type_name, race_type_score)
-
-        cv2.imwrite(f"{current_time:08d}sec.jpg", img)
+        assert (3600 * h + m * 60 + s == current_time)
+        lib.cv_util.imwrite_safe(f"{video_path.stem}_{h:02d}h{m:02d}m{s:02d}s.jpg", img)
 
         # cv2.imshow("img", cv2.resize(img, None, fx=0.5, fy=0.5))
-        # cv2.imshow("cource_img", cource_img)
-        # cv2.imshow("race_type_img", race_type_img)
         # if ord('q') == cv2.waitKey(1):
         #     break
 
