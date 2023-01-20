@@ -82,14 +82,14 @@ def main(args):
 
     sorted_rows = []
     for row in df.values:
-        if row[2] == "DLC2" or row[2] == "DLC3":
-            pass
-        else:
-            continue
         fname = Path(row[3]).stem
-        if "@" in fname:
+        if "@" in fname and ".png" in Path(row[3]).name:
             key = Path(row[3]).stem.split('@')[0]
-            second = int(Path(row[3]).stem.split('@')[1][:-2])
+            time_sec = int(Path(row[3]).stem.split('@')[1][:-2])
+            h = time_sec // 3600
+            m = (time_sec % 3600) // 60
+            s = time_sec % 60
+            second = f"{h:02d}h{m:02d}m{s:02d}s"
         else:
             key = Path(row[3]).stem.split('_')[0]
             second = Path(row[3]).stem.split('_')[-1][:-2]
@@ -116,8 +116,11 @@ def main(args):
 
     value_types = []
     for row in sorted_rows:
-#        rates = [v for v in row[4:4+12] if 99999 >= v > 500]
+        #        rates = [v for v in row[4:4+12] if 99999 >= v > 500]
         rates = [v for v in row[4:4+11] if 99999 >= v > 500]
+        if len(rates) <= 0:
+            print("INVALID", row)
+            continue
         value = get_metric(rates)
         rate_metrics.append(value)
         mirrors.append(row[1] == "mirror")

@@ -42,68 +42,78 @@ from pytube import YouTube
 
 # ブラッキーさん
 video_urls = {
-    "DLC3": [
-        "https://youtu.be/nzkk2hCIVdo",
-        "https://youtu.be/75K-jf6kiNg",
-        "https://youtu.be/EWku3jjfXpQ",
-        "https://youtu.be/Q6KToe0jD1U",
-        "https://youtu.be/Ny5KwmSNK90",
-    ],
-    "DLC2": [
-        "https://youtu.be/XcWnOL9xZ1s",
-        "https://youtu.be/ZnLUy6xvL_Y",
-        "https://youtu.be/6DQyQ6DIMJs",
-        "https://youtu.be/g0eY9QtyLPE",
-        "https://youtu.be/e3b8op8IvtU",
-    ],
-    "DLC1": [
-        "https://youtu.be/W9jHYnFrfzc",
-        "https://youtu.be/SAvl3fT0mrA",
-        "https://youtu.be/XgP2BNzrJdI",
-        "https://youtu.be/7-wos2ZnFtQ",
-        "https://youtu.be/BKZdgAR-vEg",
-    ],
+    # "DLC3": [
+    #     "https://youtu.be/nzkk2hCIVdo",
+    #     "https://youtu.be/75K-jf6kiNg",
+    #     "https://youtu.be/EWku3jjfXpQ",
+    #     "https://youtu.be/Q6KToe0jD1U",
+    #     "https://youtu.be/Ny5KwmSNK90",
+    # ],
+    # "DLC2": [
+    #     "https://youtu.be/XcWnOL9xZ1s",
+    #     "https://youtu.be/ZnLUy6xvL_Y",
+    #     "https://youtu.be/6DQyQ6DIMJs",
+    #     "https://youtu.be/g0eY9QtyLPE",
+    #     "https://youtu.be/e3b8op8IvtU",
+    # ],
+    # "DLC1": [
+    #     "https://youtu.be/W9jHYnFrfzc",
+    #     "https://youtu.be/SAvl3fT0mrA",
+    #     "https://youtu.be/XgP2BNzrJdI",
+    #     "https://youtu.be/7-wos2ZnFtQ",
+    #     "https://youtu.be/BKZdgAR-vEg",
+    # ],
     "DLC0": [
         "https://youtu.be/fZdBFzbT6aU",
         "https://youtu.be/5pChjtll3mo",
         "https://youtu.be/WHrVlKHFFCQ",
         "https://youtu.be/6ZxshMoF31Q",
         "https://youtu.be/S4Wb_3Ey0eU",
+        "https://youtu.be/69XUTaAdpOE",
+        "https://youtu.be/1ztAJrB1GQE",
+        "https://youtu.be/cCHJutf_PgI",
+        "https://youtu.be/wG8IlC2fiaQ",
+        "https://youtu.be/-U8P4xIGymY",
+        "https://youtu.be/DGn9u5jBVDA",
+        "https://youtu.be/CoiTdnxICSc",
+        "https://youtu.be/qgYGBwHqY5s",
     ],
 }
 
 
-# # シェリンさん
-# video_urls = {
-#     "DLC3": [
-#         "https://youtu.be/xERDoA3mgIw",
-#         "https://youtu.be/VNLlwQSJSfE",
-#         "https://youtu.be/zm5VwwoQztI",
-#         "https://youtu.be/VszRAi9nVKY",
-#         "https://youtu.be/rkUcfa7GL70",
-#     ],
-#     "DLC2": [
-#         "https://youtu.be/gSM0HcdIOE8",
-#         "https://youtu.be/XleWTEZcM4E",
-#         "https://youtu.be/6XaYGemD6Ac",
-#         "https://youtu.be/MmaKrHaR9k0",
-#         "https://youtu.be/Pji7YOP8XLI",
-#     ],
-#     "DLC1": [
-#         "https://youtu.be/vZLwTcXkbB4",
-#         "https://youtu.be/QDM3tvKEvOY",
-#         "https://youtu.be/Hv5r1LkhYkI",
-#         "https://youtu.be/0cZzGpwBArw",
-#         "https://youtu.be/08dkFLAHPMo",
-#     ],
-#     "DLC0": [
-#         "https://youtu.be/acsFSDFCv-Y",
-#         "https://youtu.be/dy8UdCgBxiM",
-#         "https://youtu.be/DbdzGSB3R6Y",
-#         "https://youtu.be/7pJUn-jVYvY",
-#         "https://youtu.be/iKb_qD6oFvc",
-#     ],
-# }
+# シェリンさん
+#video_urls = {
+    # "DLC3": [
+    #     "https://youtu.be/xERDoA3mgIw",
+    #     "https://youtu.be/VNLlwQSJSfE",
+    #     "https://youtu.be/zm5VwwoQztI",
+    #     "https://youtu.be/VszRAi9nVKY",
+    #     "https://youtu.be/rkUcfa7GL70",
+    # ],
+    # "DLC2": [
+    #     "https://youtu.be/gSM0HcdIOE8",
+    #     "https://youtu.be/XleWTEZcM4E",
+    #     "https://youtu.be/6XaYGemD6Ac",
+    #     "https://youtu.be/MmaKrHaR9k0",
+    #     "https://youtu.be/Pji7YOP8XLI",
+    # ],
+    # "DLC1": [
+    #     "https://youtu.be/vZLwTcXkbB4",
+    #     "https://youtu.be/QDM3tvKEvOY",
+    #     "https://youtu.be/Hv5r1LkhYkI",
+    #     "https://youtu.be/0cZzGpwBArw",
+    #     "https://youtu.be/08dkFLAHPMo",
+    # ],
+    # "DLC0": [
+    #     "https://youtu.be/acsFSDFCv-Y",
+    #     "https://youtu.be/dy8UdCgBxiM",
+    #     "https://youtu.be/DbdzGSB3R6Y",
+    #     "https://youtu.be/7pJUn-jVYvY",
+    #     "https://youtu.be/iKb_qD6oFvc",
+        # "https://youtu.be/aGOVGK3ZEuY",
+        # "https://youtu.be/wJ_Y-0BW8XM",
+    # ]
+#}
 
 from pathlib import Path
 for k, urls in video_urls.items():
@@ -114,4 +124,4 @@ for k, urls in video_urls.items():
         out_dir = "E:/prog/python/mk8dx_tools/videos/person3/" + k
         if not Path(out_dir).exists():
             Path(out_dir).mkdir(exist_ok=True, parents=True)
-        stream.download(out_dir)
+        stream.download(out_dir, stream.title + "-" + (url.split('/')[-1]) + ".mp4")

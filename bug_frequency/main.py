@@ -15,13 +15,15 @@ import torch
 import torchvision
 
 game_screen_roi = [0, 0, 1655 / 1920, 929 / 1080]
-game_screen_roi = [0, 0, 1655 / 1920, 929 / 1080]
 
-race_type_roi = [0.16, 0.85, 0.24, 0.98]
+#race_type_roi = [0.16, 0.85, 0.24, 0.98]
+race_type_roi = [0.16, 0.85, 0.24, (0.85 + 0.98) / 2] # 上半分
 course_roi = [0.72, 0.85, 0.84, 0.98]
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load('ViT-B/32', device)
+
+current_dlc = ""
 
 
 def parse_args():
@@ -66,7 +68,7 @@ course_img_dict = {}
 def initialize():
     for type_path in Path("data/race_type").glob("*.png"):
         img = cv_util.imread_safe(str(type_path))
-        type_feature = load_image_feature(img, [0, 0, 1, 1])
+        type_feature = load_image_feature(img, [0, 0, 1, 0.5]) # 上半分
         race_type_features_dict[type_path.stem] = type_feature / \
             np.linalg.norm(type_feature)
 
@@ -96,13 +98,21 @@ def find_best_match_item(feature, feature_dict):
 
 
 def detect_rates(img):
-    players_roi = [
-        93 / 1920,
-        84 / 1080,
-        1827 / 1920,
-        870 / 1080,
-    ]
+    if "person3" in str(args.img_dir) and (current_dlc == "DLC1" or current_dlc == "DLC0"):
+        players_roi = [61 / 1280, 67 / 720, 1217 / 1280, 590 / 720]
+    else:
+        players_roi = [
+            93 / 1920,
+            84 / 1080,
+            1827 / 1920,
+            870 / 1080,
+        ]
+
     players_img = crop_img(img, players_roi)
+
+    # cv2.imshow("players_img", players_img)
+    # cv2.waitKey(0)
+
     h, w = players_img.shape[:2]
     players = []
     for x in range(2):
@@ -154,11 +164,18 @@ def process(img_path, ocr_path):
         race_type_feature /= np.linalg.norm(race_type_feature)
         race_type_name, race_type_score = find_best_match_item(
             race_type_feature, race_type_features_dict)
+#        print(race_type_name)
+        race_type_name = race_type_name.split('_')[0]
 
+    # print(course_name, race_type_name, rates)
+    # cv2.imshow("race_type_img", img)
+    # cv2.waitKey(0)
+#    exit(0)
     return course_name, race_type_name, rates
 
 
 def main(args):
+    global current_dlc
     initialize()
     race_type_dict = {}
     rows = []
@@ -173,6 +190,7 @@ def main(args):
         if ii % 100 == 0:
             print(f"[{ii}/{len(all_img_paths)}] Processing {str(img_path)}...")
         dirname = img_path.parent.stem
+        current_dlc = dirname
         ocr_path = args.ocr_dir / dirname / (img_path.stem + ".txt")
         course_name, race_type_name, rates = process(
             img_path, ocr_path)
@@ -187,7 +205,7 @@ def main(args):
 
     import pandas as pd
     df = pd.DataFrame(rows)
-    df.to_csv("statistics.csv", header=[
+    df.to_csv(f"statistics_{args.img_dir.stem.split('_')[1]}.csv", header=[
               "cource", "type", "ver", "image_path"] + list(f"rate_{i}" for i in range(12)),
               index=None, encoding="sjis", errors="ignore")
 
