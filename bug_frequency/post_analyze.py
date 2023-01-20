@@ -41,20 +41,40 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+
 def config_std_div_avg():
-    get_metric = lambda rates: np.std(rates) / np.mean(rates)
+    def get_metric(rates): return np.std(rates) / np.mean(rates)
     span = 0.25
     x_label = "std/avg of rates"
     return get_metric, span, x_label
 
+
 def config_std():
-    get_metric = lambda rates: np.std(rates)
+    def get_metric(rates): return np.std(rates)
     span = 2500
-    x_label = "std/avg of rates"
+    x_label = "std of rates"
     return get_metric, span, x_label
 
+
+def config_avg():
+    def get_metric(rates): return np.mean(rates)
+    span = 2500
+    x_label = "avg of rates"
+    return get_metric, span, x_label
+
+
+def logistic_analysis(value_types):
+    from sklearn.linear_model import LogisticRegression
+    model = LogisticRegression()
+    X_train = [[v] for v, _ in value_types]
+    Y_train = [1 if t == "mirror" else 0 for _, t in value_types]
+    model.fit(X_train, Y_train)
+    regression_coefficient = model.coef_
+    print(np.exp(regression_coefficient))
+
+
 def main(args):
-    # get_metric, span, x_label = config_std_div_avg()
+    #get_metric, span, x_label = config_std_div_avg()
     get_metric, span, x_label = config_std()
 
     import pandas as pd
@@ -62,13 +82,24 @@ def main(args):
 
     sorted_rows = []
     for row in df.values:
-        key = Path(row[3]).stem.split('@')[0]
-        second = Path(row[3]).stem.split('@')[1][:-2]
+        if row[2] == "DLC2" or row[2] == "DLC3":
+            pass
+        else:
+            continue
+        fname = Path(row[3]).stem
+        if "@" in fname:
+            key = Path(row[3]).stem.split('@')[0]
+            second = int(Path(row[3]).stem.split('@')[1][:-2])
+        else:
+            key = Path(row[3]).stem.split('_')[0]
+            second = Path(row[3]).stem.split('_')[-1][:-2]
         if key in known_video_orders:
             index = known_video_orders.index(key)
         else:
             index = -1
-        sorted_rows.append(list(row) + [index, int(second)])
+        # if row[2] != "DLC0":
+        #     continue
+        sorted_rows.append(list(row) + [index, second])
 
     sorted_rows = sorted(sorted_rows, key=lambda r: (r[-2], r[-1]))
 
@@ -79,15 +110,13 @@ def main(args):
     rate_metrics = []
     mirrors = []
 
-#    thrs = [5000, 10000, 15000, 20000, 25000, 30000, 1e8]
-    thrs = [10000, 1e8]
+    thrs = [3000, 5000, 10000, 20000, 1e8]
     total_dict = {f"<{v}": 0 for v in thrs}
     occur_dict = {f"<{v}": 0 for v in thrs}
 
     value_types = []
     for row in sorted_rows:
-        rates = [v for v in row[4:4+12] if v > 0]
-#        value = np.std(rates)
+        rates = [v for v in row[4:4+12] if 99999 >= v > 500]
         value = get_metric(rates)
         rate_metrics.append(value)
         mirrors.append(row[1] == "mirror")
@@ -110,6 +139,25 @@ def main(args):
         print(f"{k}: {100 * prob:.1f}% ({occur_dict[k]}/{total_dict[k]})")
 
     value_types = sorted(value_types)
+    logistic_analysis(value_types)
+
+    #
+    #
+    #
+    print("==============================")
+
+    grp1 = value_types[:len(value_types) // 3]
+    grp2 = value_types[len(value_types) * 2 // 3:]
+    for g in [grp1, grp2]:
+        avg_value = np.mean([v for v, t in g])
+        n_mirror = np.sum([t == "mirror" for v, t in g])
+        n_200cc = np.sum([t == "200cc" for v, t in g])
+        print(int(avg_value), len(g),
+              f"mirror: {n_mirror} ({n_mirror / len(g) * 100:.1f}%)",
+              f"200cc: {n_200cc} ({n_200cc / len(g) * 100:.1f}%)",
+              )
+
+    print("==============================")
 
     xs = []
     ys_200cc = []
@@ -124,7 +172,7 @@ def main(args):
                     mirror += 1
                 if type2 == "200cc":
                     cc200 += 1
-        if n > 100:
+        if n > len(value_types) // 10:
             xs.append(value)
             ys_200cc.append(cc200 / n)
             ys_mirror.append(mirror / n)
@@ -140,12 +188,13 @@ def main(args):
     plt.plot(xs, ys_200cc, "-", label="200cc")
     plt.legend()
     plt.show()
-    return
+#    return
 
     # count
     video_dict = {}
     for row in sorted_rows:
-        key = Path(row[3]).stem.split('@')[0]
+        # key = Path(row[3]).stem.split('@')[0]
+        key = Path(row[2]).stem.split('@')[0]
         video_dict.setdefault(key, []).append(row)
 
     for key, rows in sorted(video_dict.items()):

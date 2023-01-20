@@ -117,6 +117,9 @@ def detect_rates(img):
         ret, rate = digit_ocr.detect_digit(255 - rate_img)
         if not ret:
             rate = 0
+        if not (500 <= rate <= 99999):
+            # invalid valie
+            rate = 0
         rates.append(rate)
     #     cv2.imshow(f"r{i}", rate_img)
     # cv2.waitKey(0)
@@ -138,29 +141,20 @@ def process(img_path, ocr_path):
     course_feature /= np.linalg.norm(course_feature)
     course_name, course_score = find_best_match_item(
         course_feature, thumbnail_features_dict)
-#    print(course_name, course_score)
 
-    race_type_feature = load_image_feature(img, race_type_roi)
-    race_type_feature /= np.linalg.norm(race_type_feature)
-    race_type_name, race_type_score = find_best_match_item(
-        race_type_feature, race_type_features_dict)
-#    print(race_type_name, race_type_score)
+    # detect race type (150cc, 200cc or mirror)
+    if img_path.parent.stem.endswith("_150cc"):
+        race_type_name, race_type_score = "150cc", 100
+    elif img_path.parent.stem.endswith("_200cc"):
+        race_type_name, race_type_score = "200cc", 100
+    elif img_path.parent.stem.endswith("_mirror"):
+        race_type_name, race_type_score = "mirror", 100
+    else:
+        race_type_feature = load_image_feature(img, race_type_roi)
+        race_type_feature /= np.linalg.norm(race_type_feature)
+        race_type_name, race_type_score = find_best_match_item(
+            race_type_feature, race_type_features_dict)
 
-    # if len(course_feature_dict) >= 1:
-    #     n, s = find_best_match_item(course_feature, course_feature_dict)
-    #     if s < 90:
-    #         course_feature_dict[img_path.stem] = course_feature
-    #         course_img_dict[img_path.stem] = course_img
-    # else:
-    #     course_feature_dict[img_path.stem] = course_feature
-    #     course_img_dict[img_path.stem] = course_img
-
-    # if race_type_name != "150cc":
-    #     cv2.imshow("img", img)
-    #     cv2.imshow("course_img", course_img)
-    #     cv2.imshow("race_type_img", race_type_img)
-    #     if ord('q') == cv2.waitKey(1):
-    #         exit(0)
     return course_name, race_type_name, rates
 
 
@@ -168,10 +162,12 @@ def main(args):
     initialize()
     race_type_dict = {}
     rows = []
-    for dirname in ["DLC1_frame", "DLC0_frame", "DLC0", "DLC1", "DLC2", "DLC3"]:
+#    for dirname in ["DLC1_frame", "DLC0_frame", "DLC0", "DLC1", "DLC2", "DLC3"]:
+    for dirname in ["DLC2_150cc", "DLC2_200cc", "DLC2_mirror", "DLC3_150cc", "DLC3_200cc", "DLC3_mirror",]:
         #    for dirname in ["DLC1_frame"]:
         print("Processing", dirname)  # str(img_path))
         all_img_paths = list(args.img_dir.glob(f"{dirname}/*.png"))
+        all_img_paths += list(args.img_dir.glob(f"{dirname}/*.jpg"))
         local_dict = {}
         for ii, img_path in enumerate(all_img_paths):
             ocr_path = args.ocr_dir / dirname / (img_path.stem + ".txt")
@@ -190,7 +186,7 @@ def main(args):
     df = pd.DataFrame(rows)
     df.to_csv("statistics.csv", header=[
               "cource", "type", "ver", "image_path"] + list(f"rate_{i}" for i in range(12)),
-              index=None, encoding="sjis")
+              index=None, encoding="sjis", errors="ignore")
 
     race_type_dict["total"] = np.sum([v for _, v in race_type_dict.items()])
     print(race_type_dict)
