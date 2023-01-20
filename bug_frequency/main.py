@@ -163,24 +163,27 @@ def main(args):
     race_type_dict = {}
     rows = []
 #    for dirname in ["DLC1_frame", "DLC0_frame", "DLC0", "DLC1", "DLC2", "DLC3"]:
-    for dirname in ["DLC2_150cc", "DLC2_200cc", "DLC2_mirror", "DLC3_150cc", "DLC3_200cc", "DLC3_mirror",]:
-        #    for dirname in ["DLC1_frame"]:
-        print("Processing", dirname)  # str(img_path))
-        all_img_paths = list(args.img_dir.glob(f"{dirname}/*.png"))
-        all_img_paths += list(args.img_dir.glob(f"{dirname}/*.jpg"))
-        local_dict = {}
-        for ii, img_path in enumerate(all_img_paths):
-            ocr_path = args.ocr_dir / dirname / (img_path.stem + ".txt")
-            course_name, race_type_name, rates = process(
-                img_path, ocr_path)
-            race_type_dict.setdefault(race_type_name, 0)
-            race_type_dict[race_type_name] += 1
-            local_dict.setdefault(race_type_name, 0)
-            local_dict[race_type_name] += 1
-            rows.append([course_name.split('_')[0], race_type_name,
-                        dirname.split('_')[0], str(img_path)] + rates)
-        local_dict["total"] = np.sum([v for _, v in local_dict.items()])
-        print(local_dict)
+#    for dirname in ["DLC2_150cc", "DLC2_200cc", "DLC2_mirror", "DLC3_150cc", "DLC3_200cc", "DLC3_mirror",]:
+    #    for dirname in ["DLC1_frame"]:
+ #   print("Processing", dirname)  # str(img_path))
+    all_img_paths = list(args.img_dir.glob(f"*/*.png"))
+    all_img_paths += list(args.img_dir.glob(f"*/*.jpg"))
+    local_dict = {}
+    for ii, img_path in enumerate(all_img_paths):
+        if ii % 100 == 0:
+            print(f"[{ii}/{len(all_img_paths)}] Processing {str(img_path)}...")
+        dirname = img_path.parent.stem
+        ocr_path = args.ocr_dir / dirname / (img_path.stem + ".txt")
+        course_name, race_type_name, rates = process(
+            img_path, ocr_path)
+        race_type_dict.setdefault(race_type_name, 0)
+        race_type_dict[race_type_name] += 1
+        local_dict.setdefault(race_type_name, 0)
+        local_dict[race_type_name] += 1
+        rows.append([course_name.split('_')[0], race_type_name,
+                    dirname.split('_')[0], str(img_path)] + rates)
+    local_dict["total"] = np.sum([v for _, v in local_dict.items()])
+    print(local_dict)
 
     import pandas as pd
     df = pd.DataFrame(rows)

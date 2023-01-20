@@ -41,7 +41,7 @@ def find_best_match_item(feature, feature_dict):
 
 def get_white_ratio(img):
     h, w = img.shape[:2]
-    white = cv2.inRange(img, (230, 230, 230), (255, 255, 255))
+    white = cv2.inRange(img, (220, 220, 220), (255, 255, 255))
     wr = cv2.countNonZero(white) / (h * w)
     return wr
 
@@ -54,9 +54,10 @@ def get_black_ratio(img):
 
 
 def process_video(video_path, out_dir):
-    if len(list(out_dir.glob(f"{video_path.stem}_*"))) > 0:
-        print("Skip", str(video_path), "because it seems to be already processed.")
-        return
+    if not DEBUG_MODE:
+        if len(list(out_dir.glob(f"{video_path.stem}_*"))) > 0:
+            print("Skip", str(video_path), "because it seems to be already processed.")
+            return
 
     cap = cv2.VideoCapture(str(video_path))
     cap_length_sec = cap.get(cv2.CAP_PROP_FRAME_COUNT) / \

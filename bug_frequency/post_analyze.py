@@ -116,7 +116,8 @@ def main(args):
 
     value_types = []
     for row in sorted_rows:
-        rates = [v for v in row[4:4+12] if 99999 >= v > 500]
+#        rates = [v for v in row[4:4+12] if 99999 >= v > 500]
+        rates = [v for v in row[4:4+11] if 99999 >= v > 500]
         value = get_metric(rates)
         rate_metrics.append(value)
         mirrors.append(row[1] == "mirror")
