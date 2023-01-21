@@ -1,21 +1,23 @@
-from pytube import YouTube
-
-
 from pathlib import Path
-
+from pytube import YouTube
+import re
 
 def download_videos(video_urls, person_name):
-    import re
     for k, urls in video_urls.items():
         for url in urls:
+            # 動画情報取得
             stream = YouTube(url).streams.filter(
                 file_extension='mp4').order_by('resolution').desc().first()
             print("Downloading", url, stream.title)
+
+            # 出力フォルダ・ファイル名
             out_dir = "E:/prog/python/mk8dx_tools/videos/" + person_name + "/" + k
             Path(out_dir).mkdir(exist_ok=True, parents=True)
             fname = stream.title + "-" + (url.split('/')[-1])
             fname = re.sub(r'[\\|/|:|?|.|"|<|>|\|]', '', fname)
             fname += ".mp4"
+
+            # ダウンロードして保存
             print("Saving", out_dir, "|", fname)
             stream.download(out_dir, fname)
 

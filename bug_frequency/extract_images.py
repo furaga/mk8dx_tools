@@ -13,7 +13,7 @@ DEBUG_MODE = False
 def parse_args():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--video_dir', type=Path,
-                        default=r"E:\prog\python\mk8dx_tools\videos\person1")
+                        default=r"E:\prog\python\mk8dx_tools\videos\person3")
     args = parser.parse_args()
     return args
 
