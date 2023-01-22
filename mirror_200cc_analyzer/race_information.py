@@ -1,35 +1,40 @@
-import re
 import argparse
 import cv2
 import clip
 import numpy as np
-from glob import glob
-import os
-import sys
+import pandas as pd
 from pathlib import Path
-from playsound import playsound
-import pyocr
-from PIL import Image, ImageEnhance
 from lib import cv_util, digit_ocr
 import torch
-import torchvision
 
 game_screen_roi = [0, 0, 1655 / 1920, 929 / 1080]
-
-#race_type_roi = [0.16, 0.85, 0.24, 0.98]
-race_type_roi = [0.16, 0.85, 0.24, (0.85 + 0.98) / 2] # 上半分
+race_type_roi = [0.16, 0.85, 0.24, (0.85 + 0.98) / 2]  # 上半分を使用
 course_roi = [0.72, 0.85, 0.84, 0.98]
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-model, preprocess = clip.load('ViT-B/32', device)
+players_roi_base = [
+    93 / 1920,
+    84 / 1080,
+    1827 / 1920,
+    870 / 1080,
+]
 
-current_dlc = ""
+
+cur_ver = ""
+race_type_features_dict = {}
+thumbnail_features_dict = {}
+course_feature_dict = {}
+course_img_dict = {}
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model, clip_preprocess = clip.load('ViT-B/32', device)
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('--img_dir', type=Path, default="data/images")
-    parser.add_argument('--ocr_dir', type=Path, default="data/ocr")
+    parser.add_argument('--img_dir', type=Path,
+                        default="output/images/person0")
+    parser.add_argument('--out_dir', type=Path,
+                        default="output/race_information")
     args = parser.parse_args()
     return args
 
@@ -37,7 +42,7 @@ def parse_args():
 def get_features(img):
     with torch.no_grad():
         p = cv_util.cv2pil(img)
-        image = preprocess(p).unsqueeze(0).to(device)
+        image = clip_preprocess(p).unsqueeze(0).to(device)
         features = model.encode_image(image)
         return features.cpu().numpy()
 
@@ -58,17 +63,10 @@ def load_image_feature(img, roi=None):
     return feature
 
 
-race_type_features_dict = {}
-thumbnail_features_dict = {}
-
-course_feature_dict = {}
-course_img_dict = {}
-
-
-def initialize():
+def prepare_reference_images():
     for type_path in Path("data/race_type").glob("*.png"):
         img = cv_util.imread_safe(str(type_path))
-        type_feature = load_image_feature(img, [0, 0, 1, 0.5]) # 上半分
+        type_feature = load_image_feature(img, [0, 0, 1, 0.5])  # 上半分
         race_type_features_dict[type_path.stem] = type_feature / \
             np.linalg.norm(type_feature)
 
@@ -92,28 +90,18 @@ def find_best_match_item(feature, feature_dict):
         score_list.append((n, similarity[0][0]))
 
     score_list = sorted(score_list, key=lambda p: -p[1])
-    # for name, score in score_list[:3]:
-    #     print(name, score)
     return score_list[0]
 
 
 def detect_rates(img):
-    if "person3" in str(args.img_dir) and (current_dlc == "DLC1" or current_dlc == "DLC0"):
+    if "person3" in str(args.img_dir) and (cur_ver == "DLC1" or cur_ver == "DLC0"):
+        # person3は一部の動画が微妙に位置ずれしているのでアドホックに修正
         players_roi = [61 / 1280, 67 / 720, 1217 / 1280, 590 / 720]
     else:
-        players_roi = [
-            93 / 1920,
-            84 / 1080,
-            1827 / 1920,
-            870 / 1080,
-        ]
+        players_roi = players_roi_base
 
     players_img = crop_img(img, players_roi)
 
-    # cv2.imshow("players_img", players_img)
-    # cv2.waitKey(0)
-
-    h, w = players_img.shape[:2]
     players = []
     for x in range(2):
         for y in range(6):
@@ -128,92 +116,78 @@ def detect_rates(img):
         if not ret:
             rate = 0
         if not (500 <= rate <= 99999):
-            # invalid valie
+            # invalidなら0にしておく
             rate = 0
         rates.append(rate)
-    #     cv2.imshow(f"r{i}", rate_img)
-    # cv2.waitKey(0)
 
     return rates
 
 
-def process(img_path, ocr_path):
+def process(img_path):
     img = cv_util.imread_safe(img_path)
     if img_path.parent.stem.endswith("_frame"):
         img = crop_img(img, game_screen_roi)
 
     rates = detect_rates(img)
 
-    course_img = crop_img(img, course_roi)
-    race_type_img = crop_img(img, race_type_roi)
-
     course_feature = load_image_feature(img, course_roi)
     course_feature /= np.linalg.norm(course_feature)
-    course_name, course_score = find_best_match_item(
+    course_name, _ = find_best_match_item(
         course_feature, thumbnail_features_dict)
 
     # detect race type (150cc, 200cc or mirror)
     if img_path.parent.stem.endswith("_150cc"):
-        race_type_name, race_type_score = "150cc", 100
+        race_type_name, _ = "150cc", 100
     elif img_path.parent.stem.endswith("_200cc"):
-        race_type_name, race_type_score = "200cc", 100
+        race_type_name, _ = "200cc", 100
     elif img_path.parent.stem.endswith("_mirror"):
-        race_type_name, race_type_score = "mirror", 100
+        race_type_name, _ = "mirror", 100
     else:
         race_type_feature = load_image_feature(img, race_type_roi)
         race_type_feature /= np.linalg.norm(race_type_feature)
-        race_type_name, race_type_score = find_best_match_item(
+        race_type_name, _ = find_best_match_item(
             race_type_feature, race_type_features_dict)
-#        print(race_type_name)
         race_type_name = race_type_name.split('_')[0]
 
-    # print(course_name, race_type_name, rates)
-    # cv2.imshow("race_type_img", img)
-    # cv2.waitKey(0)
-#    exit(0)
     return course_name, race_type_name, rates
 
 
 def main(args):
-    global current_dlc
-    initialize()
-    race_type_dict = {}
-    rows = []
-#    for dirname in ["DLC1_frame", "DLC0_frame", "DLC0", "DLC1", "DLC2", "DLC3"]:
-#    for dirname in ["DLC2_150cc", "DLC2_200cc", "DLC2_mirror", "DLC3_150cc", "DLC3_200cc", "DLC3_mirror",]:
-    #    for dirname in ["DLC1_frame"]:
- #   print("Processing", dirname)  # str(img_path))
+    global cur_ver
+
+    prepare_reference_images()
+
     all_img_paths = list(args.img_dir.glob(f"*/*.png"))
     all_img_paths += list(args.img_dir.glob(f"*/*.jpg"))
-    local_dict = {}
-    for ii, img_path in enumerate(all_img_paths):
-        if ii % 100 == 0:
-            print(f"[{ii}/{len(all_img_paths)}] Processing {str(img_path)}...")
+
+    race_type_dict = {}
+    rows = []
+    for i, img_path in enumerate(all_img_paths):
+        if i % 100 == 0:
+            print(f"[{i}/{len(all_img_paths)}] Processing {str(img_path)}...")
+
         dirname = img_path.parent.stem
-        current_dlc = dirname
-        ocr_path = args.ocr_dir / dirname / (img_path.stem + ".txt")
-        course_name, race_type_name, rates = process(
-            img_path, ocr_path)
+        cur_ver = dirname
+
+        course_name, race_type_name, rates = process(img_path)
+
         race_type_dict.setdefault(race_type_name, 0)
         race_type_dict[race_type_name] += 1
-        local_dict.setdefault(race_type_name, 0)
-        local_dict[race_type_name] += 1
         rows.append([course_name.split('_')[0], race_type_name,
                     dirname.split('_')[0], str(img_path)] + rates)
-    local_dict["total"] = np.sum([v for _, v in local_dict.items()])
-    print(local_dict)
 
-    import pandas as pd
+    # CSV出力
+    out_path = args.out_dir / f"{args.img_dir.stem}.csv"
+    out_path.parent.mkdir(exist_ok=True, parents=True)
     df = pd.DataFrame(rows)
-    df.to_csv(f"statistics_{args.img_dir.stem.split('_')[1]}.csv", header=[
-              "cource", "type", "ver", "image_path"] + list(f"rate_{i}" for i in range(12)),
-              index=None, encoding="sjis", errors="ignore")
+    header = ["cource", "type", "ver", "image_path"] + \
+        list(f"rate_{i}" for i in range(12))
+    df.to_csv(out_path, header=header, index=None,
+              encoding="sjis", errors="ignore")
 
+    # 種目のカウントをprint
     race_type_dict["total"] = np.sum([v for _, v in race_type_dict.items()])
     print(race_type_dict)
-
-    # for n, img in course_img_dict.items():
-    #     cv2.imwrite(n + ".png", img)
 
 
 if __name__ == '__main__':
