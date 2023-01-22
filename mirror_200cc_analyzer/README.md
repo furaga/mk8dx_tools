@@ -6,7 +6,6 @@ YouTubeのプレイ動画をダウンロードして、画像解析で各レー�
 <b>集計結果の例 https://docs.google.com/spreadsheets/d/1WAXeMbnZSGLMuhsiXlfcwdMkFvxd_VcAwz0979yXSVE/edit?usp=sharing </b>
 
 
-
 ## セットアップ
 
 PowerShell + Python 3.8.10 + CUDA11.8
@@ -22,11 +21,11 @@ python -m pip install git+https://github.com/openai/CLIP.git
 ## YouTube動画のダウンロード
 
 ```
-python download_youtube.py --target personX --out_dir output/videos
+python download_youtube.py --target person0 --out_dir output/videos
 ```
 
-成功すると、`output/vidoes/personX` 以下にダウンロードした動画が保存されます。  
-`--target` にはダウンロード対象の配信者を指定してください。  
+成功すると、`output/vidoes/person0` 以下にダウンロードした動画が保存されます。  
+`--target` にはダウンロード対象の配信者を指定してください。（READMEではperson0の例のみ記載）  
 配信者・動画URLの一覧はdownload_youtube.py内で定義されています。  
 
 
@@ -35,10 +34,10 @@ python download_youtube.py --target personX --out_dir output/videos
 各レース前に表示される参加者一覧画面を各動画から抽出します。  
 
 ```
-python playerlist_screens.py --video_dir output/videos/personX --out_dir output/images
+python playerlist_screens.py --video_dir output/videos/person0 --out_dir output/images
 ```
 
-成功すると下のような画像が `output/images/personX` 以下に保存されます。
+成功すると下のような画像が `output/images/person0` 以下に保存されます。
 
 <img src="doc/playerlist.png">
 
@@ -47,10 +46,10 @@ python playerlist_screens.py --video_dir output/videos/personX --out_dir output/
 参加者一覧画面を画像解析して、レースの詳細情報を取得します。  
 
 ```
-python race_information.py --video_dir output/videos/personX --out_dir output/race_information
+python race_information.py --video_dir output/videos/person0 --out_dir output/race_information
 ```
 
-成功すると `output/race_information/personX.csv` が出力されます。
+成功すると `output/race_information/person0.csv` が出力されます。
 
 具体的には以下を取得してCSV出力します。
 - 種目（150cc/200cc/mirror）
