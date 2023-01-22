@@ -5,10 +5,10 @@ import re
 
 all_video_urls = {
     "person0": {
-        # 作者。動画は基本非公開。動作テスト用に1動画だけ限定公開しています。
+        # person0=作者。動画は基本非公開。動作テスト用に1動画だけ限定公開しています。
         "DLC3": [
             "https://youtu.be/yhFYxC70S0U",
-        ]
+        ],
     },
     "person1": {
         "DLC3": [
