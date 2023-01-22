@@ -37,14 +37,18 @@ def find_best_match_item(feature, feature_dict):
 
 def get_white_ratio(img):
     h, w = img.shape[:2]
-    white = cv2.inRange(img, (220, 220, 220), (255, 255, 255))
+    # person0の動画は明度フィルタが乗っているのでしきい値調整
+    thr = 220 if args.video_dir.stem != "person0" else 195
+    white = cv2.inRange(img, (thr, thr, thr), (255, 255, 255))
     wr = cv2.countNonZero(white) / (h * w)
     return wr
 
 
 def get_black_ratio(img):
     h, w = img.shape[:2]
-    black = cv2.inRange(img, (0, 0, 0), (15, 15, 15))
+    # person0の動画は明度フィルタが乗っているのでしきい値調整
+    thr = 15 if args.video_dir.stem != "person0" else 25
+    black = cv2.inRange(img, (0, 0, 0), (thr, thr, thr))
     br = cv2.countNonZero(black) / (h * w)
     return br
 

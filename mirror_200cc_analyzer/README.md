@@ -46,7 +46,7 @@ python playerlist_screens.py --video_dir output/videos/person0 --out_dir output/
 参加者一覧画面を画像解析して、レースの詳細情報を取得します。  
 
 ```
-python race_information.py --video_dir output/videos/person0 --out_dir output/race_information
+python race_information.py --image_dir output/images/person0 --out_dir output/race_information
 ```
 
 成功すると `output/race_information/person0.csv` が出力されます。
