@@ -3,7 +3,9 @@
 マリオカートの8DXの野良レートのミラー率・200cc率を分析するためのツール群です。  
 YouTubeのプレイ動画をダウンロードして、画像解析で各レースの情報を取得・集計しています。
 
-集計結果 https://docs.google.com/spreadsheets/d/1WAXeMbnZSGLMuhsiXlfcwdMkFvxd_VcAwz0979yXSVE/edit?usp=sharing
+<b>集計結果の例 https://docs.google.com/spreadsheets/d/1WAXeMbnZSGLMuhsiXlfcwdMkFvxd_VcAwz0979yXSVE/edit?usp=sharing </b>
+
+
 
 ## セットアップ
 
