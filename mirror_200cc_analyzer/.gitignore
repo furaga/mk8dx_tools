@@ -1,0 +1,8 @@
+venv/
+data/images*
+data/ocr
+*.zip
+**/__pycache__
+output/images
+output/videos
+!output/race_information/*_full.csv
