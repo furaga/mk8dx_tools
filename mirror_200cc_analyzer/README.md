@@ -5,6 +5,7 @@ YouTubeのプレイ動画をダウンロードして、画像解析で各レー�
 
 <b>集計結果の例 https://docs.google.com/spreadsheets/d/1WAXeMbnZSGLMuhsiXlfcwdMkFvxd_VcAwz0979yXSVE/edit?usp=sharing </b>
 
+<b>結論としては、ミラー率は10%, 200cc率は5%のようです。</b>
 
 ## セットアップ
 
