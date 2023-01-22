@@ -6,14 +6,12 @@ from lib import cv_util
 
 DEBUG_MODE = False
 
-# video_path = Path(
-#     r"E:\prog\python\mk8dx_tools\videos\【マリカ】レート15035 今月の目標は16200!!【岸堂天真ホロスターズ】.mp4")
-
 
 def parse_args():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--video_dir', type=Path,
-                        default=r"E:\prog\python\mk8dx_tools\videos\person3")
+                        default="output/videos/person0")
+    parser.add_argument('--out_dir', type=Path, default="output/images")
     args = parser.parse_args()
     return args
 
@@ -34,8 +32,6 @@ def find_best_match_item(feature, feature_dict):
         score_list.append((n, similarity[0][0]))
 
     score_list = sorted(score_list, key=lambda p: -p[1])
-    # for name, score in score_list[:3]:
-    #     print(name, score)
     return score_list[0]
 
 
@@ -90,9 +86,6 @@ def process_video(video_path, out_dir):
     cap_length_sec = cap.get(cv2.CAP_PROP_FRAME_COUNT) / \
         cap.get(cv2.CAP_PROP_FPS)
     current_time = 0
-    ###
-    current_time = 60 * 5 + 20
-    counter = 0
 
     debug_counter = 0
     flush_args = None
@@ -113,12 +106,6 @@ def process_video(video_path, out_dir):
             break
 
         img = crop_img(img, roi)
-
-        # print(roi)
-        # cv2.imshow("img", img)
-        # print(get_black_ratio(img), get_white_ratio(img))
-        # if ord('q') == cv2.waitKey(0):
-        #     exit(0)
 
         br = get_black_ratio(img)
         if not (0.22 < br):
@@ -147,14 +134,13 @@ def process_video(video_path, out_dir):
 
 
 def main(args):
-    all_video_paths = list(args.video_dir.glob("*/*.mp4"))[::-1]
+    all_video_paths = list(args.video_dir.glob("*/*.mp4"))
     for vi, video_path in enumerate(all_video_paths):
         print("==================================")
         print(f"[{vi+1}/{len(all_video_paths)}] {str(video_path)}")
         print("==================================")
 
-        out_dir = Path("data") / ("images_" +
-                                  video_path.parent.parent.stem) / video_path.parent.stem
+        out_dir = args.out_dir / video_path.parent.parent.stem / video_path.parent.stem
         out_dir.mkdir(exist_ok=True, parents=True)
         process_video(video_path, out_dir)
 
