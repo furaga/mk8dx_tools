@@ -98,7 +98,23 @@ def picked_screen(img):
     pass
 
 
+def load_crop_info(video_path):
+    fallback = [0, 0, 1, 1]
+    crop_info_path = video_path.parent / "crop_info.txt"
+    if not crop_info_path.exists():
+        return fallback
+    with open(crop_info_path, encoding="utf8") as f:
+        for line in f:
+            tokens = line.strip().split(',')
+            #print(tokens, video_path.name, video_path.name == tokens[0])
+            if video_path.name == tokens[0]:
+                w, h, x, y = [int(t) for t in tokens[1:5]]
+                return [0, 0, x / w, y / h]
+    return fallback
+
+
 def process_video(video_path, out_dir):
+    roi = load_crop_info(video_path)
     cap = cv2.VideoCapture(str(video_path))
     current_time = 0
 
@@ -107,19 +123,23 @@ def process_video(video_path, out_dir):
         ret, img = cap.read()
         if not ret:
             break
+        img = cv_util.crop_img(img, roi)
 
         is_picking, _ = picking_screen(img)
         if is_picking:
             print("found: current_time =", current_time, "sec")
 
-            # サムネが薄いときを切り取らないように検出1秒後の画像を保存する
-            # -> 逆にミスりがちなのでやっぱりやめておく
-            # current_time += 0.5
-            #cap.set(cv2.CAP_PROP_POS_MSEC, int(current_time * 1000))
-            #ret, img = cap.read()
-            #if not ret:
-            #    break
+            # サムネが薄いときを切り取ったときように、1秒後の画像も保存しておく
             save_img(video_path, out_dir, int(current_time), img)
+
+            # 1秒後の画像もチェックする
+            current_time += 1
+            cap.set(cv2.CAP_PROP_POS_MSEC, int(current_time * 1000))
+            ret2, img2 = cap.read()
+            if not ret2:
+                break
+            img2 = cv_util.crop_img(img2, roi)
+            save_img(video_path, out_dir, int(current_time), img2)
 
             current_time += 120
 

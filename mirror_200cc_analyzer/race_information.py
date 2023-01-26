@@ -180,7 +180,7 @@ def main(args):
     out_path = args.out_dir / f"{args.img_dir.stem}.csv"
     out_path.parent.mkdir(exist_ok=True, parents=True)
     df = pd.DataFrame(rows)
-    header = ["cource", "type", "ver", "image_path"] + \
+    header = ["course", "type", "ver", "image_path"] + \
         list(f"rate_{i}" for i in range(12))
     df.to_csv(out_path, header=header, index=None,
               encoding="sjis", errors="ignore")
