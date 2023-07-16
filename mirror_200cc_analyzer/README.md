@@ -35,10 +35,10 @@ python download_youtube.py --target person0 --out_dir output/videos
 各レース前に表示される参加者一覧画面を各動画から抽出します。  
 
 ```
-python playerlist_screens.py --video_dir output/videos/person0 --out_dir output/images
+python playerlist_screens.py --video_dir "E:\prog\python\mk8dx_tools\videos\after_wave5" --out_dir output/images
 ```
 
-成功すると下のような画像が `output/images/person0` 以下に保存されます。
+成功すると下のような画像が `output/images/after_wave5` 以下に保存されます。
 
 <img src="doc/playerlist.png">
 
@@ -47,10 +47,10 @@ python playerlist_screens.py --video_dir output/videos/person0 --out_dir output/
 参加者一覧画面を画像解析して、レースの詳細情報を取得します。  
 
 ```
-python race_information.py --img_dir output/images/person0 --out_dir output/race_information
+python race_information.py --img_dir output/images/after_wave5 --out_dir output/race_information
 ```
 
-成功すると `output/race_information/person0.csv` が出力されます。
+成功すると `output/race_information/after_wave5.csv` が出力されます。
 
 具体的には以下を取得してCSV出力します。
 - 種目（150cc/200cc/mirror）

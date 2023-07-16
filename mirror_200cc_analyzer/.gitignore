@@ -6,3 +6,4 @@ data/ocr
 output/images
 output/videos
 !output/race_information/*_full.csv
+_output

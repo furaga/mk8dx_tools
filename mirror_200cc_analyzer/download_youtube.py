@@ -4,138 +4,121 @@ from pytube import YouTube
 import re
 
 all_video_urls = {
-    "person0": {
-        # person0=作者。動画は基本非公開。動作テスト用に1動画だけ限定公開しています。
-        "DLC3": [
-            "https://youtu.be/yhFYxC70S0U",
+    "after_wave5": {
+        "DLC5": [
+            # "https://youtu.be/duCKLdMCXrU",
+            # "https://youtu.be/fDaaAIbASV0",
+            # "https://youtu.be/bBmvcrky3yQ",
+            # "https://youtu.be/AA4F-7k_9WE",
+            # "https://youtu.be/npeQVQ--zls",
+            # "https://youtu.be/cDXfvlS5iqo",
+            #  "https://youtu.be/bI0412Xemww",
+            # "https://youtu.be/w668MIh2XF4",
+            # "https://youtu.be/90s5zvxWEfU",
+            # "https://youtu.be/xTbAdbjjqN4",
+            # "https://youtu.be/3gFWMlNK_zU",
+            # "https://youtu.be/EiuNRqh_1aY",
+            # "https://youtu.be/5-MMMnP8tg0",
+            # "https://youtu.be/JDP79HKhhCE",
+            # "https://youtu.be/F2dsGeO8_0M",
+            # "https://youtu.be/GuDPbU5RkwY",x
+            # "https://youtu.be/pECAFRyMzX4",
+            # #
+            # "https://youtu.be/7qP8xTIUj7w",
+            # "https://youtu.be/Tugbr0RnLaA",
+            # "https://youtu.be/xmvEad6t_pE",
+            # "https://youtu.be/WOuoRmdX6kE",
+            # "https://youtu.be/YapaTvU2h8s",
+            # "https://youtu.be/7UZ3rkycZGg",
+            # "https://youtu.be/jZvfVfBbwV4",
+            # "https://youtu.be/kF5eTwuxDMk",
+            # --------------------
+            # "https://youtu.be/xrqKRskihXw",
+            # "https://youtu.be/MLOmcjIxulU",
+            # "https://youtu.be/KJ0qHCvHoi8",
+            # "https://youtu.be/yxUB7jhUwog",
+            # "https://youtu.be/wdNBk86boxU",
+            # "https://youtu.be/n88wSw-cEV8",
+            # "https://youtu.be/SeARaNWuaho",
+            # "https://youtu.be/ZI3djYaSv2A",
+            # # "https://youtu.be/foX_rXOoHTk",
+            # "https://youtu.be/v3qLLfzuZPw",
+            # "https://youtu.be/NHBMexihuoI",
+            # "https://youtu.be/sI-ruzgj3Bc",
+            # "https://youtu.be/BAXqpvue9Wg",
+            # "https://youtu.be/jelh5tvHeiU",
+            # "https://youtu.be/xOKctXfCFq4",
+            # "https://youtu.be/XA5JByVZ82I",
+            # "https://youtu.be/7fKAbC33Hyk",
+            # "https://youtu.be/5HbX1fiOWpA",
+            # "https://youtu.be/9ZUuQg6E7UI",
+            # "https://youtu.be/YJiIIk32WiQ",
+            # "https://youtu.be/wtICVPS02GI",
+            # "https://youtu.be/_FUGM4RmTDI",
+            # "https://youtu.be/cNEJ6phsvpM",
+            # "https://youtu.be/nouFUz7UKHM",
+            # "https://youtu.be/SSgCpv2OOpQ",
+            # "https://youtu.be/Q8Xa9P4ktQM",
+            # "https://youtu.be/-1KiDxgq2iA",
+            # "https://youtu.be/cBVoGEKksNU",
+            # "https://youtu.be/D8yvYPbvBiw",
+            # "https://youtu.be/jckLC3bL_uc",
+            # "https://youtu.be/dlgfneVf5gY",
+            # "https://youtu.be/hLwROtXHkF4",
+            # "https://youtu.be/8BNu8yr2sNw",
+            # "https://youtu.be/QCBJPZoLtIU",
+            # "https://youtu.be/MRcW7Os1WiI",
+            # "https://youtu.be/4i0zQSFFlIY",
+            # "https://youtu.be/09pxdxzErlM",
+            # "https://youtu.be/XXtC5BJ-pOI",
+            # "https://youtu.be/heMkjn3D024",
+            # "https://youtu.be/3FWuF_nEiTQ",
+            # "https://youtu.be/c1YZWgQoMpo",
+            # "https://youtu.be/Qe2UxfX8IGU",
+            "https://youtu.be/7j9KzSo6zm4",
+            "https://youtu.be/ffVHnt5fbBk",
+            "https://youtu.be/uLjv7WtFtzI",
+            "https://youtu.be/5UCMvIapZj8",
+            "https://youtu.be/AbC-pF6BtYs",
+            "https://youtu.be/SvD2sq_MC6M",
+            "https://youtu.be/EaLF_iamLS8",
+            "https://youtu.be/myRbZuLVMUI",
+            "https://youtu.be/MfaYATfkaOE",
+            "https://youtu.be/krAOw371nrQ",
+            "https://youtu.be/zT48SKgRA90",
+            "https://youtu.be/6QZesTzLQUs",
+            "https://youtu.be/oR8ICuBWuIA",
+            "https://youtu.be/O__SGOEI5bA",
+            "https://youtu.be/eUjhYkkjelE",
+            "https://youtu.be/kkeX_Llx-8I",
+            "https://youtu.be/O__SGOEI5bA",
+            "https://youtu.be/gxNUEgxMm0o",
+            "https://youtu.be/Z3_RTxMJ1Jk",
+            "https://youtu.be/xE6fhuuprX4",
+            "https://youtu.be/-nC3VugBGx4",
+            "https://youtu.be/bwiOUuCuewk",
+            "https://youtu.be/7UnX2RjY5AE",
+            "https://youtu.be/QArpuH9I_Ds",
+            "https://youtu.be/-HGHVr_I_mE",
+            "https://youtu.be/BUbD6BW8XtU",
+
+            NH-PkfGzXvE
+            rJes27rqBiI
+            gNcNXiLPpVc
+            "https://youtu.be/JoqN01XdEPI",
+            "https://youtu.be/rqne4gJvnXM",
+            "https://youtu.be/FGbE6dsDEi8",
         ],
     },
-    "person1": {
-        "DLC3": [
-            "https://youtu.be/xERDoA3mgIw",
-            "https://youtu.be/VNLlwQSJSfE",
-            "https://youtu.be/zm5VwwoQztI",
-            "https://youtu.be/VszRAi9nVKY",
-            "https://youtu.be/rkUcfa7GL70",
-        ],
-        "DLC2": [
-            "https://youtu.be/gSM0HcdIOE8",
-            "https://youtu.be/XleWTEZcM4E",
-            "https://youtu.be/6XaYGemD6Ac",
-            "https://youtu.be/MmaKrHaR9k0",
-            "https://youtu.be/Pji7YOP8XLI",
-            "https://youtu.be/uTxIxTwB0Wg",
-            "https://youtu.be/c0isk0voHF0",
-            "https://youtu.be/oJ7U3GQGgJ8",
-            "https://youtu.be/mMPN5gRXR-c",
-            "https://youtu.be/_71RHmtzTWQ",
-        ],
-        "DLC1": [
-            "https://youtu.be/vZLwTcXkbB4",
-            "https://youtu.be/QDM3tvKEvOY",
-            "https://youtu.be/Hv5r1LkhYkI",
-            "https://youtu.be/0cZzGpwBArw",
-            "https://youtu.be/08dkFLAHPMo",
-        ],
-        "DLC0": [
-            "https://youtu.be/acsFSDFCv-Y",
-            "https://youtu.be/dy8UdCgBxiM",
-            "https://youtu.be/DbdzGSB3R6Y",
-            "https://youtu.be/7pJUn-jVYvY",
-            "https://youtu.be/iKb_qD6oFvc",
-            "https://youtu.be/aGOVGK3ZEuY",
-            "https://youtu.be/wJ_Y-0BW8XM",
-        ]
-    },
-    "person2": {
-        "DLC3": [
-            'https://youtu.be/2T9CSdLG4Uc',
-            "https://youtu.be/tSje7fBabcU",
-            "https://youtu.be/qkQpFmBagOk",
-            "https://youtu.be/hNBsv_xw2dM",
-            "https://youtu.be/X_T8d5vHusU",
-            "https://youtu.be/KH1N5K-d7ZY",
-            "https://youtu.be/bpujYlvwE-Q",
-            "https://youtu.be/vv05PaMeXXE",
-            "https://youtu.be/5bQt063y8Tw",
-            "https://youtu.be/JAre5u7M8fM",
-            "https://youtu.be/wcDW6ok_2u0",
-            "https://youtu.be/H10NutNHJYo",
-            "https://youtu.be/uwO357yKr24",
-            "https://youtu.be/GD8Mam46TK4",
-            "https://youtu.be/I9zX_XDf5hw",
-            "https://youtu.be/p-SZeBtdLeo",
-            "https://youtu.be/8nePRlD_C1w",
-        ],
-        "DLC2": [
-            "https://youtu.be/pEJQqG6H3L8",
-            "https://youtu.be/IngTu2nA9Yk",
-            "https://youtu.be/-JD_JFeumPM",
-            "https://youtu.be/_i4fSyhT1Us",
-            "https://youtu.be/L5N8yC-tuso",
-            "https://youtu.be/zSb7EcicOW8",
-            "https://youtu.be/FrAopgit4fU",
-            "https://youtu.be/7Mouo4NC42U",
-            "https://youtu.be/tAomMmPvyHQ",
-            "https://youtu.be/SfXhjZPHiOU",
-            "https://youtu.be/IzGbDA7MFLQ",
-            "https://youtu.be/miocd9sWJ-Q",
-            "https://youtu.be/KjZqY223-GY",
-            "https://youtu.be/2SlMKr6TSpk",
-            "https://youtu.be/CQlZPk3En_w",
-        ]
-    },
-    "person3": {
-        "DLC3": [
-            "https://youtu.be/nzkk2hCIVdo",
-            "https://youtu.be/75K-jf6kiNg",
-            "https://youtu.be/EWku3jjfXpQ",
-            "https://youtu.be/Q6KToe0jD1U",
-            "https://youtu.be/Ny5KwmSNK90",
-        ],
-        "DLC2": [
-            "https://youtu.be/XcWnOL9xZ1s",
-            "https://youtu.be/ZnLUy6xvL_Y",
-            "https://youtu.be/6DQyQ6DIMJs",
-            "https://youtu.be/g0eY9QtyLPE",
-            "https://youtu.be/e3b8op8IvtU",
-            "https://youtu.be/zsL5n1IFU68",
-            "https://youtu.be/QEpltEr0q4k",
-            "https://youtu.be/YJWD_8gEKXs",
-            "https://youtu.be/1fg5ZpZsagM",
-            "https://youtu.be/53w-2r_KqbY",
-            "https://youtu.be/Sh2z7_xQ8GU",
-        ],
-        "DLC1": [
-            "https://youtu.be/W9jHYnFrfzc",
-            "https://youtu.be/SAvl3fT0mrA",
-            "https://youtu.be/XgP2BNzrJdI",
-            "https://youtu.be/7-wos2ZnFtQ",
-            "https://youtu.be/BKZdgAR-vEg",
-        ],
-        "DLC0": [
-            "https://youtu.be/fZdBFzbT6aU",
-            "https://youtu.be/5pChjtll3mo",
-            "https://youtu.be/WHrVlKHFFCQ",
-            "https://youtu.be/6ZxshMoF31Q",
-            "https://youtu.be/S4Wb_3Ey0eU",
-            "https://youtu.be/69XUTaAdpOE",
-            "https://youtu.be/1ztAJrB1GQE",
-            "https://youtu.be/cCHJutf_PgI",
-            "https://youtu.be/wG8IlC2fiaQ",
-            "https://youtu.be/-U8P4xIGymY",
-            "https://youtu.be/DGn9u5jBVDA",
-            "https://youtu.be/CoiTdnxICSc",
-            "https://youtu.be/qgYGBwHqY5s",
-        ],
-    }
 }
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='')
-    parser.add_argument('--target', type=str, default="person0")
-    parser.add_argument('--out_dir', type=Path, default="output/videos")
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument("--target", type=str, default="after_wave5")
+    parser.add_argument(
+        "--out_dir", type=Path, default=r"E:\prog\python\mk8dx_tools\videos"
+    )
     args = parser.parse_args()
     return args
 
@@ -143,29 +126,37 @@ def parse_args():
 def download_videos(video_urls, person_name, out_dir):
     for k, urls in video_urls.items():
         for url in urls:
-            # 動画情報取得
-            stream = YouTube(url).streams.filter(
-                file_extension='mp4').order_by('resolution').desc().first()
-            print("Downloading", url, stream.title)
+            try:
+                # 動画情報取得
+                print("URL:", url)
+                stream = (
+                    YouTube(url)
+                    .streams.filter(file_extension="mp4")
+                    .order_by("resolution")
+                    .desc()
+                    .first()
+                )
 
-            # 出力フォルダ・ファイル名
-            out_video_dir = out_dir / person_name / k
-            out_video_dir.mkdir(exist_ok=True, parents=True)
-            fname = stream.title + "-" + (url.split('/')[-1])
-            fname = re.sub(r'[\\|/|:|?|.|"|<|>|\|]', '', fname)
-            fname += ".mp4"
+                # 出力フォルダ・ファイル名
+                out_video_dir = out_dir / person_name / k
+                out_video_dir.mkdir(exist_ok=True, parents=True)
+                fname = stream.title + "-" + (url.split("/")[-1])
+                fname = re.sub(r'[\\|/|:|?|.|"|<|>|\|]', "", fname)
+                fname += ".mp4"
 
-            # ダウンロードして保存
-            print("Saving", str(out_video_dir), "|", fname)
-            stream.download(str(out_video_dir), fname)
+                if (
+                    not (out_video_dir / "done" / fname).exists()
+                    and not (out_video_dir / fname).exists()
+                ):
+                    # ダウンロードして保存
+                    print("Downloading", url, "to", str(out_video_dir / fname))
+                    stream.download(str(out_video_dir), fname)
+            except Exception as e:
+                print("Error:", url, str(e))
 
 
 def main(args):
-    download_videos(
-        all_video_urls[args.target],
-        args.target,
-        args.out_dir
-    )
+    download_videos(all_video_urls[args.target], args.target, args.out_dir)
 
 
 if __name__ == "__main__":
